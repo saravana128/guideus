@@ -33,7 +33,7 @@ try {
 const endpoint =
   process.env.APPWRITE_ENDPOINT || "https://sgp.cloud.appwrite.io/v1";
 const projectId = process.env.APPWRITE_PROJECT_ID || "6a8c5fae001dbdfe1290";
-const apiKey = process.env.APPWRITE_API_KEY || "standard_95404802f67e348ae16ac4781f01f2cbfc82122ccf46ee4f9efbdfc1fe8c64683a07716e86b929ef2f4c7112d196384999dec42d51b274350c107ffe2d21eeb7e79cd0270379235de5985dbd5e81652a0f55db239209b759062a14d0a51d5b7bab14febab3041824495f0749988b25f3a624f5d5fbe2721be52ae35dc9615354";
+const apiKey = process.env.APPWRITE_API_KEY || "";
 const databaseId = process.env.APPWRITE_DATABASE_ID || "guideus_db";
 const tasksCollectionId = process.env.APPWRITE_TASKS_COLLECTION_ID || "tasks";
 const storageBucketId = process.env.APPWRITE_STORAGE_ID || "task_attachments";
