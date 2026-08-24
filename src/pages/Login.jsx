@@ -25,7 +25,12 @@ function Login() {
       await login(formData.email, formData.password)
       navigate('/dashboard')
     } catch (err) {
-      setError(err.message)
+      console.error('[Login] Error details:', err)
+      // Show the raw message so we can see exactly what went wrong
+      setError(
+        err.message ||
+        'An unexpected error occurred. Check the browser console for details.'
+      )
     } finally {
       setLoading(false)
     }
