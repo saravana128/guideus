@@ -28,39 +28,41 @@
 
 ## ✨ Features
 
-| Feature | Description |
-|---------|-------------|
-| ✅ **Create Tasks** | Add new tasks with title, description, and due date |
-| 📝 **Edit Tasks** | Update task details at any time |
-| 🗑️ **Delete Tasks** | Remove tasks that are no longer needed |
-| ✔️ **Mark as Completed** | Quickly toggle task completion status |
-| 📅 **Due Dates** | Set and track due dates for each task |
-| 🏷️ **Task Status** | Manage task status (Pending, In Progress, Completed, Overdue) |
-| 🖼️ **Reference Images** | Attach reference images to tasks for visual context |
-| 🔐 **User Authentication** | Secure login and registration via Appwrite |
-| 📱 **Responsive Design** | Works seamlessly on desktop, tablet, and mobile |
-| 🔍 **Search & Filter** | Find tasks quickly with search and status filters |
+| Feature                    | Description                                                   |
+| -------------------------- | ------------------------------------------------------------- |
+| ✅ **Create Tasks**        | Add new tasks with title, description, and due date           |
+| 📝 **Edit Tasks**          | Update task details at any time                               |
+| 🗑️ **Delete Tasks**        | Remove tasks that are no longer needed                        |
+| ✔️ **Mark as Completed**   | Quickly toggle task completion status                         |
+| 📅 **Due Dates**           | Set and track due dates for each task                         |
+| 🏷️ **Task Status**         | Manage task status (Pending, In Progress, Completed, Overdue) |
+| 🖼️ **Reference Images**    | Attach reference images to tasks for visual context           |
+| 🔐 **User Authentication** | Secure login and registration via Appwrite                    |
+| 📱 **Responsive Design**   | Works seamlessly on desktop, tablet, and mobile               |
+| 🔍 **Search & Filter**     | Find tasks quickly with search and status filters             |
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-| Technology | Purpose |
-|------------|---------|
-| [React](https://react.dev/) | UI Library |
-| [React Router](https://reactrouter.com/) | Client-side Routing |
-| [Tailwind CSS](https://tailwindcss.com/) | Styling & UI Framework |
-| [Vite](https://vitejs.dev/) | Build Tool & Dev Server |
-| [Appwrite SDK](https://appwrite.io/docs/sdks) | Backend Communication |
+
+| Technology                                    | Purpose                 |
+| --------------------------------------------- | ----------------------- |
+| [React](https://react.dev/)                   | UI Library              |
+| [React Router](https://reactrouter.com/)      | Client-side Routing     |
+| [Tailwind CSS](https://tailwindcss.com/)      | Styling & UI Framework  |
+| [Vite](https://vitejs.dev/)                   | Build Tool & Dev Server |
+| [Appwrite SDK](https://appwrite.io/docs/sdks) | Backend Communication   |
 
 ### Backend
-| Technology | Purpose |
-|------------|---------|
-| [Appwrite](https://appwrite.io/) | Backend-as-a-Service (BaaS) |
-| Appwrite Auth | User Authentication & Management |
-| Appwrite Database | Data Storage & Retrieval |
-| Appwrite Storage | File & Image Storage |
+
+| Technology                       | Purpose                          |
+| -------------------------------- | -------------------------------- |
+| [Appwrite](https://appwrite.io/) | Backend-as-a-Service (BaaS)      |
+| Appwrite Auth                    | User Authentication & Management |
+| Appwrite Database                | Data Storage & Retrieval         |
+| Appwrite Storage                 | File & Image Storage             |
 
 ---
 
@@ -134,12 +136,14 @@ GuideUs/
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/yourusername/guideus.git
    cd GuideUs
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -147,6 +151,7 @@ GuideUs/
 3. **Set up environment variables**
 
    Copy `.env.example` to `.env` and fill in your Appwrite details:
+
    ```bash
    cp .env.example .env
    ```
@@ -162,11 +167,13 @@ GuideUs/
 4. **Run the Appwrite setup script** (optional — creates database, collection, indexes, and storage bucket)
 
    Create an API key in your Appwrite project with permissions for **Databases** and **Storage**, then run:
+
    ```bash
    npm run setup:appwrite
    ```
 
 5. **Start the development server**
+
    ```bash
    npm run dev
    ```
@@ -227,25 +234,25 @@ You can set up Appwrite resources automatically using the included setup script,
 
 ### Collection: `tasks`
 
-| Attribute | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `title` | String (max 255) | ✅ Yes | Task title |
-| `description` | String (max 5000) | ❌ No | Detailed task description |
-| `status` | Enum | ✅ Yes | `pending`, `in_progress`, `completed`, `overdue` |
-| `dueDate` | Datetime | ✅ Yes | Task due date and time |
-| `completed` | Boolean | ✅ Yes | Whether the task is completed |
-| `userId` | String | ✅ Yes | Owner user ID (relationship) |
-| `imageUrl` | String | ❌ No | Reference image file ID from storage |
-| `createdAt` | Datetime | ✅ Yes | Auto-generated creation timestamp |
-| `updatedAt` | Datetime | ✅ Yes | Auto-generated update timestamp |
+| Attribute     | Type              | Required | Description                                      |
+| ------------- | ----------------- | -------- | ------------------------------------------------ |
+| `title`       | String (max 255)  | ✅ Yes   | Task title                                       |
+| `description` | String (max 5000) | ❌ No    | Detailed task description                        |
+| `status`      | Enum              | ✅ Yes   | `pending`, `in_progress`, `completed`, `overdue` |
+| `dueDate`     | Datetime          | ✅ Yes   | Task due date and time                           |
+| `completed`   | Boolean           | ✅ Yes   | Whether the task is completed                    |
+| `userId`      | String            | ✅ Yes   | Owner user ID (relationship)                     |
+| `imageUrl`    | String            | ❌ No    | Reference image file ID from storage             |
+| `createdAt`   | Datetime          | ✅ Yes   | Auto-generated creation timestamp                |
+| `updatedAt`   | Datetime          | ✅ Yes   | Auto-generated update timestamp                  |
 
 ### Indexes
 
-| Index Name | Attributes | Type | Purpose |
-|------------|-----------|------|---------|
-| `idx_user_tasks` | `userId`, `createdAt` | Key | Fetch user's tasks efficiently |
-| `idx_status` | `status`, `userId` | Key | Filter tasks by status |
-| `idx_due_date` | `dueDate`, `userId` | Key | Sort/filter by due date |
+| Index Name       | Attributes            | Type | Purpose                        |
+| ---------------- | --------------------- | ---- | ------------------------------ |
+| `idx_user_tasks` | `userId`, `createdAt` | Key  | Fetch user's tasks efficiently |
+| `idx_status`     | `status`, `userId`    | Key  | Filter tasks by status         |
+| `idx_due_date`   | `dueDate`, `userId`   | Key  | Sort/filter by due date        |
 
 ---
 
@@ -253,43 +260,43 @@ You can set up Appwrite resources automatically using the included setup script,
 
 ### Authentication
 
-| Method | Service | Description |
-|--------|---------|-------------|
-| `POST` | `authService.register()` | Register a new user |
-| `POST` | `authService.login()` | Login with email & password |
-| `DELETE` | `authService.logout()` | Logout current session |
-| `GET` | `authService.getCurrentUser()` | Get logged-in user info |
+| Method   | Service                        | Description                 |
+| -------- | ------------------------------ | --------------------------- |
+| `POST`   | `authService.register()`       | Register a new user         |
+| `POST`   | `authService.login()`          | Login with email & password |
+| `DELETE` | `authService.logout()`         | Logout current session      |
+| `GET`    | `authService.getCurrentUser()` | Get logged-in user info     |
 
 ### Tasks
 
-| Method | Service | Description |
-|--------|---------|-------------|
-| `GET` | `taskService.listTasks(userId)` | Fetch all tasks for a user |
-| `GET` | `taskService.getTask(taskId)` | Fetch a single task |
-| `POST` | `taskService.createTask(data)` | Create a new task |
-| `PATCH` | `taskService.updateTask(taskId, data)` | Update an existing task |
-| `DELETE` | `taskService.deleteTask(taskId)` | Delete a task |
-| `PATCH` | `taskService.toggleComplete(taskId)` | Toggle task completion |
+| Method   | Service                                | Description                |
+| -------- | -------------------------------------- | -------------------------- |
+| `GET`    | `taskService.listTasks(userId)`        | Fetch all tasks for a user |
+| `GET`    | `taskService.getTask(taskId)`          | Fetch a single task        |
+| `POST`   | `taskService.createTask(data)`         | Create a new task          |
+| `PATCH`  | `taskService.updateTask(taskId, data)` | Update an existing task    |
+| `DELETE` | `taskService.deleteTask(taskId)`       | Delete a task              |
+| `PATCH`  | `taskService.toggleComplete(taskId)`   | Toggle task completion     |
 
 ### Storage
 
-| Method | Service | Description |
-|--------|---------|-------------|
-| `POST` | `storageService.uploadImage(file)` | Upload a reference image |
-| `GET` | `storageService.getImageUrl(fileId)` | Get image preview URL |
+| Method   | Service                              | Description              |
+| -------- | ------------------------------------ | ------------------------ |
+| `POST`   | `storageService.uploadImage(file)`   | Upload a reference image |
+| `GET`    | `storageService.getImageUrl(fileId)` | Get image preview URL    |
 | `DELETE` | `storageService.deleteImage(fileId)` | Delete an uploaded image |
 
 ---
 
 ## 📜 Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Runs the app in development mode |
-| `npm start` | Alias for `npm run dev` |
-| `npm run build` | Builds the app for production |
-| `npm run lint` | Lints the codebase |
-| `npm run format` | Formats code with Prettier |
+| Command                  | Description                                                        |
+| ------------------------ | ------------------------------------------------------------------ |
+| `npm run dev`            | Runs the app in development mode                                   |
+| `npm start`              | Alias for `npm run dev`                                            |
+| `npm run build`          | Builds the app for production                                      |
+| `npm run lint`           | Lints the codebase                                                 |
+| `npm run format`         | Formats code with Prettier                                         |
 | `npm run setup:appwrite` | Creates Appwrite database, collection, indexes, and storage bucket |
 
 ---
@@ -322,7 +329,9 @@ APPWRITE_API_KEY=your_api_key_with_database_and_storage_permissions
 ## 🎨 UI Components
 
 ### Task Card
+
 Displays individual task information including:
+
 - Title & truncated description
 - Status badge (color-coded)
 - Due date with overdue indicator
@@ -330,7 +339,9 @@ Displays individual task information including:
 - Quick action buttons (edit, delete, mark complete)
 
 ### Task Form
+
 Modal-based form for creating/editing tasks:
+
 - Title input (required)
 - Rich description textarea
 - Date & time picker for due date
@@ -338,7 +349,9 @@ Modal-based form for creating/editing tasks:
 - Image upload with preview
 
 ### Task Filter
+
 Filter and sort tasks by:
+
 - Status (All, Pending, In Progress, Completed, Overdue)
 - Due date range
 - Search by title/description

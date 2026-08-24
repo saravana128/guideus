@@ -1,40 +1,40 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
-import Button from '../components/common/Button'
-import Input from '../components/common/Input'
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import Button from "../components/common/Button";
+import Input from "../components/common/Input";
 
 function Login() {
-  const [formData, setFormData] = useState({ email: '', password: '' })
-  const [error, setError] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const { login } = useAuth()
-  const navigate = useNavigate()
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
     try {
-      await login(formData.email, formData.password)
-      navigate('/dashboard')
+      await login(formData.email, formData.password);
+      navigate("/dashboard");
     } catch (err) {
-      console.error('[Login] Error details:', err)
+      console.error("[Login] Error details:", err);
       // Show the raw message so we can see exactly what went wrong
       setError(
         err.message ||
-        'An unexpected error occurred. Check the browser console for details.'
-      )
+          "An unexpected error occurred. Check the browser console for details.",
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="max-w-md mx-auto py-12">
@@ -67,19 +67,22 @@ function Login() {
             required
           />
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? "Signing in..." : "Sign In"}
           </Button>
         </form>
 
         <p className="mt-4 text-center text-sm text-gray-600">
-          Don&apos;t have an account?{' '}
-          <Link to="/register" className="text-primary-600 hover:underline font-medium">
+          Don&apos;t have an account?{" "}
+          <Link
+            to="/register"
+            className="text-primary-600 hover:underline font-medium"
+          >
             Register
           </Link>
         </p>
       </div>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;

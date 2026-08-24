@@ -1,7 +1,7 @@
-import React from 'react'
+import React from "react";
 
 function Modal({ isOpen, onClose, title, children, footer }) {
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -23,7 +23,7 @@ function Modal({ isOpen, onClose, title, children, footer }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Modal
+export default Modal;

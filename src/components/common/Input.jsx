@@ -1,11 +1,6 @@
-import React from 'react'
+import React from "react";
 
-function Input({
-  label,
-  error,
-  className = '',
-  ...props
-}) {
+function Input({ label, error, className = "", ...props }) {
   return (
     <div className={`w-full ${className}`}>
       {label && (
@@ -13,10 +8,13 @@ function Input({
           {label}
         </label>
       )}
-      <input className={`input ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`} {...props} />
+      <input
+        className={`input ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`}
+        {...props}
+      />
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
     </div>
-  )
+  );
 }
 
-export default Input
+export default Input;

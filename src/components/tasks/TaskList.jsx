@@ -1,10 +1,17 @@
-import React from 'react'
-import TaskCard from './TaskCard'
-import Loader from '../common/Loader'
+import React from "react";
+import TaskCard from "./TaskCard";
+import Loader from "../common/Loader";
 
-function TaskList({ tasks, loading, onToggle, onDelete, onEdit, emptyMessage = 'No tasks found.' }) {
+function TaskList({
+  tasks,
+  loading,
+  onToggle,
+  onDelete,
+  onEdit,
+  emptyMessage = "No tasks found.",
+}) {
   if (loading) {
-    return <Loader size="lg" className="py-12" />
+    return <Loader size="lg" className="py-12" />;
   }
 
   if (tasks.length === 0) {
@@ -12,7 +19,7 @@ function TaskList({ tasks, loading, onToggle, onDelete, onEdit, emptyMessage = '
       <div className="card text-center py-12">
         <p className="text-gray-500">{emptyMessage}</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -27,7 +34,7 @@ function TaskList({ tasks, loading, onToggle, onDelete, onEdit, emptyMessage = '
         />
       ))}
     </div>
-  )
+  );
 }
 
-export default TaskList
+export default TaskList;
