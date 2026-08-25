@@ -17,22 +17,45 @@ function resolveStatus(task) {
   return task.status || TASK_STATUS.PENDING;
 }
 
+function withResolvedStatus(task) {
+  return { ...task, rawStatus: task.status, status: resolveStatus(task) };
+}
+
+function buildPermissions(creatorId, assignedTo) {
+  const permissions = [
+    Permission.read(Role.users()),
+    Permission.update(Role.user(creatorId)),
+    Permission.delete(Role.user(creatorId)),
+  ];
+  if (assignedTo && assignedTo !== creatorId) {
+    permissions.push(Permission.update(Role.user(assignedTo)));
+  }
+  return permissions;
+}
+
+function toIsoDate(value) {
+  if (!value) return value;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toISOString();
+}
+
 export const taskService = {
-  async listTasks(userId, filters = {}) {
+  async listTasks(filters = {}) {
     ensureConfig();
 
     try {
-      const queries = [Query.equal("userId", userId)];
+      const queries = [];
 
-      if (filters.status && filters.status !== "all") {
-        queries.push(Query.equal("status", filters.status));
+      if (filters.courseId) {
+        queries.push(Query.equal("courseId", filters.courseId));
       }
-
-      if (filters.search) {
-        queries.push(Query.search("title", filters.search));
+      if (filters.userId) {
+        queries.push(Query.equal("userId", filters.userId));
       }
-
-      queries.push(Query.orderDesc("createdAt"));
+      if (filters.assignedTo) {
+        queries.push(Query.equal("assignedTo", filters.assignedTo));
+      }
+      queries.push(Query.limit(500));
 
       const response = await databases.listDocuments(
         databaseId,
@@ -40,10 +63,25 @@ export const taskService = {
         queries,
       );
 
-      return response.documents.map((task) => ({
-        ...task,
-        status: resolveStatus(task),
-      }));
+      let tasks = response.documents.map(withResolvedStatus);
+
+      // Status & search are applied client-side so the derived
+      // "overdue" status also works as a filter.
+      if (filters.status && filters.status !== "all") {
+        tasks = tasks.filter((task) => task.status === filters.status);
+      }
+      if (filters.search) {
+        const search = filters.search.toLowerCase();
+        tasks = tasks.filter(
+          (task) =>
+            task.title?.toLowerCase().includes(search) ||
+            task.description?.toLowerCase().includes(search),
+        );
+      }
+
+      return tasks.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+      );
     } catch (error) {
       throw new Error(error.message || "Failed to fetch tasks");
     }
@@ -58,26 +96,29 @@ export const taskService = {
         tasksCollectionId,
         taskId,
       );
-      return {
-        ...task,
-        status: resolveStatus(task),
-      };
+      return withResolvedStatus(task);
     } catch (error) {
       throw new Error(error.message || "Failed to fetch task");
     }
   },
 
-  async createTask(taskData, userId) {
+  async createTask(taskData, user) {
     ensureConfig();
 
     try {
+      const assignedTo = taskData.assignedTo || user.$id;
+      const status = taskData.status || TASK_STATUS.PENDING;
       const data = {
         title: taskData.title,
         description: taskData.description || "",
-        status: taskData.status || TASK_STATUS.PENDING,
-        dueDate: taskData.dueDate,
-        completed: false,
-        userId,
+        status,
+        dueDate: toIsoDate(taskData.dueDate),
+        completed: status === TASK_STATUS.COMPLETED,
+        userId: user.$id,
+        createdByName: user.name || user.email || "",
+        courseId: taskData.courseId || null,
+        assignedTo,
+        assignedToName: taskData.assignedToName || user.name || "Me",
         imageUrl: taskData.imageUrl || null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -88,60 +129,109 @@ export const taskService = {
         tasksCollectionId,
         ID.unique(),
         data,
-        [
-          Permission.read(Role.user(userId)),
-          Permission.update(Role.user(userId)),
-          Permission.delete(Role.user(userId)),
-        ],
+        buildPermissions(user.$id, assignedTo),
       );
 
-      return {
-        ...task,
-        status: resolveStatus(task),
-      };
+      return withResolvedStatus(task);
     } catch (error) {
       throw new Error(error.message || "Failed to create task");
     }
   },
 
-  async updateTask(taskId, taskData, existingImageUrl = null) {
+  async updateTask(taskId, taskData) {
     ensureConfig();
 
     try {
-      const data = {
-        title: taskData.title,
-        description: taskData.description || "",
-        status: taskData.status,
-        dueDate: taskData.dueDate,
-        completed: taskData.completed ?? false,
-        updatedAt: new Date().toISOString(),
-      };
+      const existing = await databases.getDocument(
+        databaseId,
+        tasksCollectionId,
+        taskId,
+      );
 
-      if (taskData.imageUrl !== undefined) {
-        data.imageUrl = taskData.imageUrl || null;
+      const data = { updatedAt: new Date().toISOString() };
+      if (taskData.title !== undefined) data.title = taskData.title;
+      if (taskData.description !== undefined)
+        data.description = taskData.description || "";
+      if (taskData.status !== undefined) {
+        data.status = taskData.status;
+        data.completed = taskData.status === TASK_STATUS.COMPLETED;
       }
+      if (taskData.completed !== undefined) data.completed = taskData.completed;
+      if (taskData.dueDate !== undefined)
+        data.dueDate = toIsoDate(taskData.dueDate);
+      if (taskData.courseId !== undefined)
+        data.courseId = taskData.courseId || null;
+      if (taskData.assignedTo !== undefined) {
+        data.assignedTo = taskData.assignedTo || existing.userId;
+        data.assignedToName = taskData.assignedToName || "";
+      }
+      if (taskData.imageUrl !== undefined)
+        data.imageUrl = taskData.imageUrl || null;
 
       const task = await databases.updateDocument(
         databaseId,
         tasksCollectionId,
         taskId,
         data,
+        buildPermissions(
+          existing.userId,
+          data.assignedTo ?? existing.assignedTo,
+        ),
       );
 
       if (
-        existingImageUrl &&
-        data.imageUrl !== existingImageUrl &&
+        existing.imageUrl &&
+        taskData.imageUrl !== undefined &&
+        data.imageUrl !== existing.imageUrl &&
         !data.imageUrl
       ) {
-        await storageService.deleteImage(existingImageUrl).catch(() => {});
+        await storageService.deleteImage(existing.imageUrl).catch(() => {});
       }
 
-      return {
-        ...task,
-        status: resolveStatus(task),
-      };
+      return withResolvedStatus(task);
     } catch (error) {
       throw new Error(error.message || "Failed to update task");
+    }
+  },
+
+  /** Inline status change from the task list */
+  async updateTaskStatus(taskId, status) {
+    ensureConfig();
+
+    try {
+      const updated = await databases.updateDocument(
+        databaseId,
+        tasksCollectionId,
+        taskId,
+        {
+          status,
+          completed: status === TASK_STATUS.COMPLETED,
+          updatedAt: new Date().toISOString(),
+        },
+      );
+      return withResolvedStatus(updated);
+    } catch (error) {
+      throw new Error(error.message || "Failed to update status");
+    }
+  },
+
+  /** Inline due-date change from the task list */
+  async updateTaskDueDate(taskId, dueDate) {
+    ensureConfig();
+
+    try {
+      const updated = await databases.updateDocument(
+        databaseId,
+        tasksCollectionId,
+        taskId,
+        {
+          dueDate: toIsoDate(dueDate),
+          updatedAt: new Date().toISOString(),
+        },
+      );
+      return withResolvedStatus(updated);
+    } catch (error) {
+      throw new Error(error.message || "Failed to update due date");
     }
   },
 
@@ -154,9 +244,10 @@ export const taskService = {
         completed,
         status: completed
           ? TASK_STATUS.COMPLETED
-          : task.status === TASK_STATUS.COMPLETED
+          : task.rawStatus === TASK_STATUS.COMPLETED ||
+              task.status === TASK_STATUS.COMPLETED
             ? TASK_STATUS.PENDING
-            : task.status,
+            : task.rawStatus || task.status,
         updatedAt: new Date().toISOString(),
       };
 
@@ -167,10 +258,7 @@ export const taskService = {
         data,
       );
 
-      return {
-        ...updated,
-        status: resolveStatus(updated),
-      };
+      return withResolvedStatus(updated);
     } catch (error) {
       throw new Error(error.message || "Failed to update task");
     }
@@ -190,3 +278,4 @@ export const taskService = {
     }
   },
 };
+

@@ -1,16 +1,21 @@
-import React from "react";
-
 const variants = {
   primary: "btn-primary",
   secondary: "btn-secondary",
   danger: "btn-danger",
-  outline:
-    "btn border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-500",
+  ghost: "btn-ghost",
+  outline: "btn-secondary",
+};
+
+const sizes = {
+  sm: "!px-3 !py-1.5 text-xs",
+  md: "",
+  lg: "!px-6 !py-3 text-base",
 };
 
 function Button({
   children,
   variant = "primary",
+  size = "md",
   type = "button",
   disabled = false,
   className = "",
@@ -22,7 +27,7 @@ function Button({
       type={type}
       disabled={disabled}
       onClick={onClick}
-      className={`${variants[variant] || variants.primary} ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
+      className={`${variants[variant] || variants.primary} ${sizes[size] || ""} ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
       {...props}
     >
       {children}

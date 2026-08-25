@@ -110,8 +110,8 @@ async function setup() {
           attr.key,
           attr.size,
           attr.required,
-          attr.default || undefined,
-          attr.key !== "status",
+          attr.default || undefined, // xdefault
+          false, // array – always create a plain string column, never an array
         );
       } else if (attr.type === "datetime") {
         await databases.createDatetimeAttribute(
@@ -135,32 +135,6 @@ async function setup() {
         console.log(`ℹ️  Attribute "${attr.key}" exists`);
       } else {
         console.error(`❌ Attribute "${attr.key}" failed:`, error.message);
-      }
-    }
-  }
-
-  // 4. Indexes
-  const indexes = [
-    { key: "idx_user_tasks", type: "key", attributes: ["userId", "createdAt"] },
-    { key: "idx_status", type: "key", attributes: ["status", "userId"] },
-    { key: "idx_due_date", type: "key", attributes: ["dueDate", "userId"] },
-  ];
-
-  for (const idx of indexes) {
-    try {
-      await databases.createIndex(
-        databaseId,
-        tasksCollectionId,
-        idx.key,
-        idx.type,
-        idx.attributes,
-      );
-      console.log(`✅ Created index "${idx.key}"`);
-    } catch (error) {
-      if (error.message?.includes("already exists") || error.code === 409) {
-        console.log(`ℹ️  Index "${idx.key}" exists`);
-      } else {
-        console.error(`❌ Index "${idx.key}" failed:`, error.message);
       }
     }
   }

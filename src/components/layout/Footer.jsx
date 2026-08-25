@@ -1,11 +1,10 @@
-import React from "react";
-
 function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-200 mt-12">
-      <div className="container mx-auto px-4 py-6 text-center text-gray-500 text-sm">
+    <footer className="border-t border-white/5 mt-16">
+      <div className="container mx-auto px-4 py-8 text-center text-sm text-surface-500">
         <p>
-          © {new Date().getFullYear()} Guide Us. Built with React & Appwrite.
+          © {new Date().getFullYear()} GuideUs · Crafted with{" "}
+          <span className="gradient-text font-semibold">React & Appwrite</span>
         </p>
       </div>
     </footer>

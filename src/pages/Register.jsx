@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import Button from "../components/common/Button";
@@ -49,12 +49,22 @@ function Register() {
   };
 
   return (
-    <div className="max-w-md mx-auto py-12">
-      <div className="card">
-        <h2 className="text-2xl font-bold text-center mb-6">Create Account</h2>
+    <div className="max-w-md mx-auto py-12 animate-fade-in-up">
+      <div className="card shadow-glow-lg">
+        <div className="text-center mb-8">
+          <div className="h-14 w-14 mx-auto rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-2xl shadow-glow mb-4">
+            ✨
+          </div>
+          <h2 className="font-display text-2xl font-bold text-white">
+            Create Account
+          </h2>
+          <p className="text-sm text-surface-400 mt-1">
+            Join GuideUs and start collaborating
+          </p>
+        </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
+          <div className="bg-rose-500/10 border border-rose-500/30 text-rose-300 px-4 py-3 rounded-xl text-sm mb-4">
             {error}
           </div>
         )}
@@ -101,11 +111,11 @@ function Register() {
           </Button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-gray-600">
+        <p className="mt-6 text-center text-sm text-surface-400">
           Already have an account?{" "}
           <Link
             to="/login"
-            className="text-primary-600 hover:underline font-medium"
+            className="text-primary-300 hover:text-primary-200 font-semibold"
           >
             Sign in
           </Link>

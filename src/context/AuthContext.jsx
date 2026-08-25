@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, useCallback } from "react";
 import { authService } from "../services/authService";
+import { profileService } from "../services/profileService";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null);
@@ -12,6 +13,10 @@ export function AuthProvider({ children }) {
     try {
       const currentUser = await authService.getCurrentUser();
       setUser(currentUser);
+      // Keep the shared user directory in sync (fire and forget)
+      if (currentUser) {
+        profileService.ensureProfile(currentUser).catch(() => {});
+      }
     } catch {
       setUser(null);
     } finally {

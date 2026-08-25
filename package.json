@@ -10,7 +10,8 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 10",
     "preview": "vite preview",
     "format": "prettier --write .",
-    "setup:appwrite": "node scripts/setup-appwrite.js"
+    "setup:appwrite": "node scripts/setup-appwrite.js",
+    "setup:appwrite:v2": "node scripts/migrate-appwrite-v2.js"
   },
   "dependencies": {
     "appwrite": "^15.0.0",

@@ -1,36 +1,48 @@
-import React from "react";
-import TaskCard from "./TaskCard";
-import Loader from "../common/Loader";
+import TaskListItem from "./TaskListItem";
 
 function TaskList({
   tasks,
   loading,
-  onToggle,
-  onDelete,
+  onStatusChange,
+  onDueDateChange,
   onEdit,
+  onDelete,
   emptyMessage = "No tasks found.",
 }) {
   if (loading) {
-    return <Loader size="lg" className="py-12" />;
+    return (
+      <div className="space-y-3">
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            className="glass rounded-2xl h-[68px] animate-pulse"
+            style={{ animationDelay: `${i * 120}ms` }}
+          />
+        ))}
+      </div>
+    );
   }
 
   if (tasks.length === 0) {
     return (
-      <div className="card text-center py-12">
-        <p className="text-gray-500">{emptyMessage}</p>
+      <div className="card text-center py-14 animate-fade-in">
+        <div className="text-5xl mb-4">🗂️</div>
+        <p className="text-surface-400">{emptyMessage}</p>
       </div>
     );
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {tasks.map((task) => (
-        <TaskCard
+    <div className="space-y-3">
+      {tasks.map((task, index) => (
+        <TaskListItem
           key={task.$id}
           task={task}
-          onToggle={onToggle}
-          onDelete={onDelete}
+          index={index}
+          onStatusChange={onStatusChange}
+          onDueDateChange={onDueDateChange}
           onEdit={onEdit}
+          onDelete={onDelete}
         />
       ))}
     </div>

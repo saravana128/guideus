@@ -28,18 +28,23 @@
 
 ## ✨ Features
 
-| Feature                    | Description                                                   |
-| -------------------------- | ------------------------------------------------------------- |
-| ✅ **Create Tasks**        | Add new tasks with title, description, and due date           |
-| 📝 **Edit Tasks**          | Update task details at any time                               |
-| 🗑️ **Delete Tasks**        | Remove tasks that are no longer needed                        |
-| ✔️ **Mark as Completed**   | Quickly toggle task completion status                         |
-| 📅 **Due Dates**           | Set and track due dates for each task                         |
-| 🏷️ **Task Status**         | Manage task status (Pending, In Progress, Completed, Overdue) |
-| 🖼️ **Reference Images**    | Attach reference images to tasks for visual context           |
-| 🔐 **User Authentication** | Secure login and registration via Appwrite                    |
-| 📱 **Responsive Design**   | Works seamlessly on desktop, tablet, and mobile               |
-| 🔍 **Search & Filter**     | Find tasks quickly with search and status filters             |
+| Feature                     | Description                                                             |
+| --------------------------- | ----------------------------------------------------------------------- |
+| 🎓 **Courses**              | Organize tasks into color-coded courses                                 |
+| 📊 **Progress Percentage**  | Each course shows a live completion % (progress bar + ring)             |
+| 💬 **Course Chat**          | Realtime comment section per course (Appwrite Realtime)                 |
+| 👥 **Task Assignment**      | Create tasks and assign them to any user — or yourself                  |
+| ⚡ **Inline Editing**       | Change task status & due date directly from the task list               |
+| ✅ **Create Tasks**         | Add new tasks with title, description, and due date                     |
+| 📝 **Edit Tasks**           | Update task details at any time                                         |
+| 🗑️ **Delete Tasks**         | Remove tasks that are no longer needed                                  |
+| ✔️ **Mark as Completed**    | Quickly toggle task completion status                                   |
+| 📅 **Due Dates**            | Set and track due dates for each task                                   |
+| 🏷️ **Task Status**          | Manage task status (Pending, In Progress, Completed, Overdue)           |
+| 🖼️ **Reference Images**     | Attach reference images to tasks for visual context                     |
+| 🔐 **User Authentication**  | Secure login and registration via Appwrite                              |
+| 📱 **Responsive Design**    | Fancy dark glassmorphism UI on desktop, tablet, and mobile              |
+| 🔍 **Search & Filter**      | Find tasks quickly with search and status filters                       |
 
 ---
 
@@ -71,26 +76,35 @@
 ```
 GuideUs/
 ├── scripts/
-│   └── setup-appwrite.js        # Appwrite resource setup script
+│   ├── setup-appwrite.js        # Appwrite resource setup script (v1)
+│   └── migrate-appwrite-v2.js   # v2 migration: courses, comments, profiles, task assignment
 ├── src/
 │   ├── components/
 │   │   ├── common/
+│   │   │   ├── Avatar.jsx
 │   │   │   ├── Button.jsx
 │   │   │   ├── Input.jsx
 │   │   │   ├── Modal.jsx
 │   │   │   └── Loader.jsx
+│   │   ├── comments/
+│   │   │   └── CommentSection.jsx
+│   │   ├── courses/
+│   │   │   ├── CourseCard.jsx
+│   │   │   ├── CourseForm.jsx
+│   │   │   └── CourseProgress.jsx
 │   │   ├── layout/
 │   │   │   ├── Navbar.jsx
 │   │   │   └── Footer.jsx
 │   │   └── tasks/
-│   │       ├── TaskCard.jsx
 │   │       ├── TaskForm.jsx
 │   │       ├── TaskList.jsx
+│   │       ├── TaskListItem.jsx
 │   │       └── TaskFilter.jsx
 │   ├── context/
 │   │   └── AuthContext.jsx
 │   ├── hooks/
 │   │   ├── useAuth.js
+│   │   ├── useCourses.js
 │   │   └── useTasks.js
 │   ├── lib/
 │   │   └── appwrite.js
@@ -99,16 +113,19 @@ GuideUs/
 │   │   ├── Login.jsx
 │   │   ├── Register.jsx
 │   │   ├── Dashboard.jsx
+│   │   ├── CoursePage.jsx
 │   │   └── TaskPage.jsx
 │   ├── services/
 │   │   ├── authService.js
+│   │   ├── courseService.js
+│   │   ├── commentService.js
+│   │   ├── profileService.js
 │   │   ├── taskService.js
 │   │   └── storageService.js
 │   ├── utils/
 │   │   ├── constants.js
 │   │   └── helpers.js
 │   ├── App.jsx
-│   ├── App.css
 │   ├── main.jsx
 │   └── index.css
 ├── .env
@@ -161,6 +178,9 @@ GuideUs/
    VITE_APPWRITE_PROJECT_ID=your_project_id
    VITE_APPWRITE_DATABASE_ID=guideus_db
    VITE_APPWRITE_TASKS_COLLECTION_ID=tasks
+   VITE_APPWRITE_COURSES_COLLECTION_ID=courses
+   VITE_APPWRITE_COMMENTS_COLLECTION_ID=comments
+   VITE_APPWRITE_PROFILES_COLLECTION_ID=profiles
    VITE_APPWRITE_STORAGE_ID=task_attachments
    ```
 
@@ -193,6 +213,30 @@ You can set up Appwrite resources automatically using the included setup script,
 3. Run the setup script:
    ```bash
    npm run setup:appwrite
+   ```
+
+### v2 Migration (Courses, Chat & Task Assignment)
+
+If you already ran the v1 setup (`setup:appwrite`), run the v2 migration to add everything the new features need. The script is **idempotent** — safe to run multiple times.
+
+1. Make sure `APPWRITE_API_KEY` is set in your `.env` (needs **Databases** and **Users read** scopes).
+2. Run:
+
+   ```bash
+   npm run setup:appwrite:v2
+   ```
+
+   (or directly: `node scripts/migrate-appwrite-v2.js`)
+
+3. The script will:
+   - Create the `courses`, `comments` and `profiles` collections (with attributes & indexes)
+   - Add `courseId`, `assignedTo`, `assignedToName`, `createdByName` to the `tasks` collection
+   - **Backfill a profile document for every existing Appwrite user** (used for the "Assign To" user list)
+   - Move existing tasks into a per-user **"General"** course and assign them to their owner
+4. Restart the dev server afterwards so the new `VITE_APPWRITE_*_COLLECTION_ID` variables load:
+
+   ```bash
+   npm run dev
    ```
 
 ### Manual Setup
@@ -290,14 +334,15 @@ You can set up Appwrite resources automatically using the included setup script,
 
 ## 📜 Available Scripts
 
-| Command                  | Description                                                        |
-| ------------------------ | ------------------------------------------------------------------ |
-| `npm run dev`            | Runs the app in development mode                                   |
-| `npm start`              | Alias for `npm run dev`                                            |
-| `npm run build`          | Builds the app for production                                      |
-| `npm run lint`           | Lints the codebase                                                 |
-| `npm run format`         | Formats code with Prettier                                         |
-| `npm run setup:appwrite` | Creates Appwrite database, collection, indexes, and storage bucket |
+| Command                     | Description                                                                     |
+| --------------------------- | ------------------------------------------------------------------------------- |
+| `npm run dev`               | Runs the app in development mode                                                |
+| `npm start`                 | Alias for `npm run dev`                                                         |
+| `npm run build`             | Builds the app for production                                                   |
+| `npm run lint`              | Lints the codebase                                                              |
+| `npm run format`            | Formats code with Prettier                                                      |
+| `npm run setup:appwrite`    | Creates Appwrite database, tasks collection, and storage bucket (v1)            |
+| `npm run setup:appwrite:v2` | v2 migration: courses, comments, profiles collections + task assignment columns |
 
 ---
 
@@ -313,6 +358,9 @@ VITE_APPWRITE_PROJECT_ID=your_project_id
 # Database Configuration
 VITE_APPWRITE_DATABASE_ID=guideus_db
 VITE_APPWRITE_TASKS_COLLECTION_ID=tasks
+VITE_APPWRITE_COURSES_COLLECTION_ID=courses
+VITE_APPWRITE_COMMENTS_COLLECTION_ID=comments
+VITE_APPWRITE_PROFILES_COLLECTION_ID=profiles
 
 # Storage Configuration
 VITE_APPWRITE_STORAGE_ID=task_attachments
@@ -328,15 +376,23 @@ APPWRITE_API_KEY=your_api_key_with_database_and_storage_permissions
 
 ## 🎨 UI Components
 
-### Task Card
+### Course Card
 
-Displays individual task information including:
+Displays a course on the dashboard including:
 
-- Title & truncated description
-- Status badge (color-coded)
-- Due date with overdue indicator
-- Reference image thumbnail (if attached)
-- Quick action buttons (edit, delete, mark complete)
+- Gradient theme color & initial tile
+- Completion progress bar with live percentage
+- Completed / total task counts
+- Quick actions (edit, delete) on hover
+
+### Task List Item
+
+Tasks render as inline-editable rows inside a course:
+
+- Status dropdown — change status without opening the task
+- Due date picker — reschedule directly from the list
+- Assignee avatar & "assigned by" attribution
+- Overdue highlighting
 
 ### Task Form
 
@@ -344,16 +400,25 @@ Modal-based form for creating/editing tasks:
 
 - Title input (required)
 - Rich description textarea
+- Course selector (required)
+- **Assign To** selector — pick any registered user (defaults to yourself)
 - Date & time picker for due date
 - Status dropdown
 - Image upload with preview
 
+### Course Chat
+
+Realtime comment stream per course:
+
+- Live updates via Appwrite Realtime
+- Chat bubbles with avatars and relative timestamps
+- Delete your own messages
+
 ### Task Filter
 
-Filter and sort tasks by:
+Filter tasks within a course by:
 
 - Status (All, Pending, In Progress, Completed, Overdue)
-- Due date range
 - Search by title/description
 
 ---
