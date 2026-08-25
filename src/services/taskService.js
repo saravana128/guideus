@@ -32,15 +32,21 @@ function withResolvedStatus(task) {
 }
 
 function buildPermissions(creatorId, assignedTo) {
+  if (!creatorId) {
+    throw new Error("The signed-in user ID is missing");
+  }
+
+  if (assignedTo && !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(assignedTo)) {
+    throw new Error(
+      "The assignee must be an Appwrite Auth user ID, not a profile document ID",
+    );
+  }
+
   const permissions = [
     Permission.read(Role.users()),
-    Permission.update(Role.user(creatorId)),
-    Permission.delete(Role.user(creatorId)),
+    Permission.update(Role.users()),
+    Permission.delete(Role.users()),
   ];
-  if (assignedTo && assignedTo !== creatorId) {
-    permissions.push(Permission.read(Role.user(assignedTo)));
-    permissions.push(Permission.update(Role.user(assignedTo)));
-  }
   return permissions;
 }
 
