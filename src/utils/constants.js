@@ -27,6 +27,36 @@ export const SELECTABLE_STATUSES = [
   TASK_STATUS.COMPLETED,
 ];
 
+export const TASK_CATEGORY = {
+  LEARNING: "learning",
+  ACTION: "action",
+};
+
+export const TASK_CATEGORY_LABELS = {
+  [TASK_CATEGORY.LEARNING]: "Learning",
+  [TASK_CATEGORY.ACTION]: "Action",
+};
+
+export const TASK_CATEGORY_ICONS = {
+  [TASK_CATEGORY.LEARNING]: "📚",
+  [TASK_CATEGORY.ACTION]: "⚡",
+};
+
+export const TASK_CATEGORY_COLORS = {
+  [TASK_CATEGORY.LEARNING]:
+    "bg-violet-400/10 text-violet-300 border-violet-400/25",
+  [TASK_CATEGORY.ACTION]:
+    "bg-orange-400/10 text-orange-300 border-orange-400/25",
+};
+
+export const SELECTABLE_CATEGORIES = [
+  TASK_CATEGORY.LEARNING,
+  TASK_CATEGORY.ACTION,
+];
+
+// Fallback for tasks created before categories existed
+export const DEFAULT_TASK_CATEGORY = TASK_CATEGORY.ACTION;
+
 export const DATABASE_CONFIG = {
   databaseId: import.meta.env.VITE_APPWRITE_DATABASE_ID || "",
   tasksCollectionId: import.meta.env.VITE_APPWRITE_TASKS_COLLECTION_ID || "",

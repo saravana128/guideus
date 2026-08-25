@@ -8,6 +8,7 @@ import {
 } from "../../utils/constants";
 import { toDateTimeLocalValue, isOverdue } from "../../utils/helpers";
 import Avatar from "../common/Avatar";
+import CategoryBadge from "./CategoryBadge";
 
 function MiniSpinner() {
   return (
@@ -101,6 +102,20 @@ function TaskListItem({
           {task.title}
         </Link>
         <div className="mt-1 flex items-center gap-2 text-xs text-surface-400 flex-wrap">
+          <CategoryBadge category={task.category} />
+          {task.referenceUrl && (
+            <a
+              href={task.referenceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(event) => event.stopPropagation()}
+              className="badge bg-cyan-400/10 text-cyan-300 border-cyan-400/25 hover:bg-cyan-400/20 transition-colors"
+              title="Open reference link"
+              aria-label={`Open reference link for ${task.title}`}
+            >
+              <span aria-hidden="true">🔗</span> Reference
+            </a>
+          )}
           <span className="inline-flex items-center gap-1.5">
             <Avatar name={task.assignedToName || "?"} size="xs" />
             {task.assignedToName || "Unassigned"}

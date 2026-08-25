@@ -1,5 +1,9 @@
 import { databases, ID, Query, Permission, Role } from "../lib/appwrite";
-import { DATABASE_CONFIG, TASK_STATUS } from "../utils/constants";
+import {
+  DATABASE_CONFIG,
+  TASK_STATUS,
+  DEFAULT_TASK_CATEGORY,
+} from "../utils/constants";
 import { isOverdue } from "../utils/helpers";
 import { storageService } from "./storageService";
 
@@ -18,7 +22,13 @@ function resolveStatus(task) {
 }
 
 function withResolvedStatus(task) {
-  return { ...task, rawStatus: task.status, status: resolveStatus(task) };
+  return {
+    ...task,
+    rawStatus: task.status,
+    status: resolveStatus(task),
+    // Tasks created before categories existed default to "action"
+    category: task.category || DEFAULT_TASK_CATEGORY,
+  };
 }
 
 function buildPermissions(creatorId, assignedTo) {
@@ -112,6 +122,7 @@ export const taskService = {
         title: taskData.title,
         description: taskData.description || "",
         status,
+        category: taskData.category || DEFAULT_TASK_CATEGORY,
         dueDate: toIsoDate(taskData.dueDate),
         completed: status === TASK_STATUS.COMPLETED,
         userId: user.$id,
@@ -120,6 +131,7 @@ export const taskService = {
         assignedTo,
         assignedToName: taskData.assignedToName || user.name || "Me",
         imageUrl: taskData.imageUrl || null,
+        referenceUrl: taskData.referenceUrl?.trim() || null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -157,6 +169,8 @@ export const taskService = {
         data.completed = taskData.status === TASK_STATUS.COMPLETED;
       }
       if (taskData.completed !== undefined) data.completed = taskData.completed;
+      if (taskData.category !== undefined)
+        data.category = taskData.category || DEFAULT_TASK_CATEGORY;
       if (taskData.dueDate !== undefined)
         data.dueDate = toIsoDate(taskData.dueDate);
       if (taskData.courseId !== undefined)
@@ -167,6 +181,8 @@ export const taskService = {
       }
       if (taskData.imageUrl !== undefined)
         data.imageUrl = taskData.imageUrl || null;
+      if (taskData.referenceUrl !== undefined)
+        data.referenceUrl = taskData.referenceUrl?.trim() || null;
 
       const task = await databases.updateDocument(
         databaseId,

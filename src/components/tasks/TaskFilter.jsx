@@ -2,6 +2,9 @@ import {
   TASK_STATUS,
   TASK_STATUS_LABELS,
   SELECTABLE_STATUSES,
+  TASK_CATEGORY_LABELS,
+  TASK_CATEGORY_ICONS,
+  SELECTABLE_CATEGORIES,
 } from "../../utils/constants";
 
 function TaskFilter({ filters, onChange }) {
@@ -46,8 +49,22 @@ function TaskFilter({ filters, onChange }) {
           <option value={TASK_STATUS.OVERDUE}>Overdue</option>
         </select>
 
+        <select
+          value={filters.category || "all"}
+          onChange={(e) => onChange({ ...filters, category: e.target.value })}
+          className="input sm:w-48"
+          aria-label="Filter by category"
+        >
+          <option value="all">All Categories</option>
+          {SELECTABLE_CATEGORIES.map((category) => (
+            <option key={category} value={category}>
+              {TASK_CATEGORY_ICONS[category]} {TASK_CATEGORY_LABELS[category]}
+            </option>
+          ))}
+        </select>
+
         <button
-          onClick={() => onChange({ search: "", status: "all" })}
+          onClick={() => onChange({ search: "", status: "all", category: "all" })}
           className="btn-secondary whitespace-nowrap"
         >
           Clear

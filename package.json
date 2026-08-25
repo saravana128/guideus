@@ -11,7 +11,9 @@
     "preview": "vite preview",
     "format": "prettier --write .",
     "setup:appwrite": "node scripts/setup-appwrite.js",
-    "setup:appwrite:v2": "node scripts/migrate-appwrite-v2.js"
+    "setup:appwrite:v2": "node scripts/migrate-appwrite-v2.js",
+    "setup:appwrite:v3": "node scripts/migrate-appwrite-v3.js",
+    "setup:appwrite:v4": "node scripts/migrate-appwrite-v4.js"
   },
   "dependencies": {
     "appwrite": "^15.0.0",

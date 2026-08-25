@@ -9,6 +9,7 @@ import Button from "../components/common/Button";
 import Loader from "../components/common/Loader";
 import Avatar from "../components/common/Avatar";
 import TaskForm from "../components/tasks/TaskForm";
+import CategoryBadge from "../components/tasks/CategoryBadge";
 
 function TaskPage() {
   const { id } = useParams();
@@ -101,6 +102,7 @@ function TaskPage() {
           >
             {TASK_STATUS_LABELS[task.status] || "Pending"}
           </span>
+          <CategoryBadge category={task.category} />
           {task.completed && (
             <span className="badge bg-emerald-400/10 text-emerald-300 border-emerald-400/25">
               ✓ Completed
@@ -164,6 +166,24 @@ function TaskPage() {
             </div>
           </div>
         </div>
+
+        {task.referenceUrl && (
+          <div className="mb-6">
+            <p className="text-xs uppercase tracking-wider text-surface-500 mb-2">
+              Reference Link
+            </p>
+            <a
+              href={task.referenceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-xl border border-cyan-400/25 bg-cyan-400/10 px-4 py-3 text-sm font-medium text-cyan-300 transition-colors hover:bg-cyan-400/20 hover:text-cyan-200 break-all"
+            >
+              <span aria-hidden="true">🔗</span>
+              {task.referenceUrl}
+              <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        )}
 
         {imageUrl && (
           <div className="mb-6">

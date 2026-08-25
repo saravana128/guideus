@@ -34,6 +34,7 @@
 | 📊 **Progress Percentage**  | Each course shows a live completion % (progress bar + ring)             |
 | 💬 **Course Chat**          | Realtime comment section per course (Appwrite Realtime)                 |
 | 👥 **Task Assignment**      | Create tasks and assign them to any user — or yourself                  |
+| 🏷️ **Task Categories**      | Mark tasks as 📚 Learning or ⚡ Action, with badges & filters            |
 | ⚡ **Inline Editing**       | Change task status & due date directly from the task list               |
 | ✅ **Create Tasks**         | Add new tasks with title, description, and due date                     |
 | 📝 **Edit Tasks**           | Update task details at any time                                         |
@@ -42,6 +43,7 @@
 | 📅 **Due Dates**            | Set and track due dates for each task                                   |
 | 🏷️ **Task Status**          | Manage task status (Pending, In Progress, Completed, Overdue)           |
 | 🖼️ **Reference Images**     | Attach reference images to tasks for visual context                     |
+| 🔗 **Reference Links**      | Link a task to an external video or document                            |
 | 🔐 **User Authentication**  | Secure login and registration via Appwrite                              |
 | 📱 **Responsive Design**    | Fancy dark glassmorphism UI on desktop, tablet, and mobile              |
 | 🔍 **Search & Filter**      | Find tasks quickly with search and status filters                       |
@@ -77,7 +79,9 @@
 GuideUs/
 ├── scripts/
 │   ├── setup-appwrite.js        # Appwrite resource setup script (v1)
-│   └── migrate-appwrite-v2.js   # v2 migration: courses, comments, profiles, task assignment
+│   ├── migrate-appwrite-v2.js   # v2 migration: courses, comments, profiles, task assignment
+│   ├── migrate-appwrite-v3.js   # v3 migration: task category attribute + backfill
+│   └── migrate-appwrite-v4.js   # v4 migration: task reference link attribute
 ├── src/
 │   ├── components/
 │   │   ├── common/
@@ -96,6 +100,7 @@ GuideUs/
 │   │   │   ├── Navbar.jsx
 │   │   │   └── Footer.jsx
 │   │   └── tasks/
+│   │       ├── CategoryBadge.jsx
 │   │       ├── TaskForm.jsx
 │   │       ├── TaskList.jsx
 │   │       ├── TaskListItem.jsx
@@ -283,10 +288,12 @@ If you already ran the v1 setup (`setup:appwrite`), run the v2 migration to add 
 | `title`       | String (max 255)  | ✅ Yes   | Task title                                       |
 | `description` | String (max 5000) | ❌ No    | Detailed task description                        |
 | `status`      | Enum              | ✅ Yes   | `pending`, `in_progress`, `completed`, `overdue` |
+| `category`    | String (max 20)   | ❌ No    | `learning` or `action` (defaults to `action`)    |
 | `dueDate`     | Datetime          | ✅ Yes   | Task due date and time                           |
 | `completed`   | Boolean           | ✅ Yes   | Whether the task is completed                    |
 | `userId`      | String            | ✅ Yes   | Owner user ID (relationship)                     |
 | `imageUrl`    | String            | ❌ No    | Reference image file ID from storage             |
+| `referenceUrl`| String (max 2000) | ❌ No    | External video or document URL                   |
 | `createdAt`   | Datetime          | ✅ Yes   | Auto-generated creation timestamp                |
 | `updatedAt`   | Datetime          | ✅ Yes   | Auto-generated update timestamp                  |
 
@@ -343,6 +350,8 @@ If you already ran the v1 setup (`setup:appwrite`), run the v2 migration to add 
 | `npm run format`            | Formats code with Prettier                                                      |
 | `npm run setup:appwrite`    | Creates Appwrite database, tasks collection, and storage bucket (v1)            |
 | `npm run setup:appwrite:v2` | v2 migration: courses, comments, profiles collections + task assignment columns |
+| `npm run setup:appwrite:v3` | v3 migration: adds the task `category` attribute + backfills existing tasks     |
+| `npm run setup:appwrite:v4` | v4 migration: adds the optional task `referenceUrl` attribute                   |
 
 ---
 
@@ -390,6 +399,7 @@ Displays a course on the dashboard including:
 Tasks render as inline-editable rows inside a course:
 
 - Status dropdown — change status without opening the task
+- Category badge — 📚 Learning or ⚡ Action
 - Due date picker — reschedule directly from the list
 - Assignee avatar & "assigned by" attribution
 - Overdue highlighting
@@ -400,10 +410,12 @@ Modal-based form for creating/editing tasks:
 
 - Title input (required)
 - Rich description textarea
+- **Category** picker — 📚 Learning or ⚡ Action (defaults to Action)
 - Course selector (required)
 - **Assign To** selector — pick any registered user (defaults to yourself)
-- Date & time picker for due date
+- Date & time picker for due date with +1, +2, +3 and +5 day shortcuts
 - Status dropdown
+- External video/document reference link
 - Image upload with preview
 
 ### Course Chat
@@ -419,6 +431,7 @@ Realtime comment stream per course:
 Filter tasks within a course by:
 
 - Status (All, Pending, In Progress, Completed, Overdue)
+- Category (All, 📚 Learning, ⚡ Action)
 - Search by title/description
 
 ---

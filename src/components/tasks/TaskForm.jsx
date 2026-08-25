@@ -3,6 +3,11 @@ import {
   TASK_STATUS,
   TASK_STATUS_LABELS,
   SELECTABLE_STATUSES,
+  TASK_CATEGORY,
+  TASK_CATEGORY_LABELS,
+  TASK_CATEGORY_ICONS,
+  TASK_CATEGORY_COLORS,
+  SELECTABLE_CATEGORIES,
 } from "../../utils/constants";
 import { storageService } from "../../services/storageService";
 import { courseService } from "../../services/courseService";
@@ -13,11 +18,15 @@ import Modal from "../common/Modal";
 import Button from "../common/Button";
 import Input from "../common/Input";
 
+const DUE_DATE_SUGGESTIONS = [1, 2, 3, 5];
+
 const blankForm = (userId, courseId) => ({
   title: "",
   description: "",
   status: TASK_STATUS.PENDING,
+  category: TASK_CATEGORY.ACTION,
   dueDate: "",
+  referenceUrl: "",
   courseId: courseId || "",
   assignedTo: userId || "",
   imageUrl: null,
@@ -85,7 +94,9 @@ function TaskForm({
           title: task.title || "",
           description: task.description || "",
           status,
+          category: task.category || TASK_CATEGORY.ACTION,
           dueDate: toDateTimeLocalValue(task.dueDate),
+          referenceUrl: task.referenceUrl || "",
           courseId: task.courseId || defaultCourseId || "",
           assignedTo: task.assignedTo || user?.$id || "",
           imageUrl: task.imageUrl || null,
@@ -105,6 +116,15 @@ function TaskForm({
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const setSuggestedDueDate = (days) => {
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + days);
+    setFormData((prev) => ({
+      ...prev,
+      dueDate: toDateTimeLocalValue(dueDate.toISOString()),
+    }));
   };
 
   const handleImageChange = (e) => {
@@ -138,6 +158,17 @@ function TaskForm({
       if (!formData.title.trim()) throw new Error("Title is required");
       if (!formData.dueDate) throw new Error("Due date is required");
       if (!formData.courseId) throw new Error("Please pick a course");
+      if (formData.referenceUrl.trim()) {
+        let reference;
+        try {
+          reference = new URL(formData.referenceUrl.trim());
+        } catch {
+          throw new Error("Please enter a valid reference URL");
+        }
+        if (!["http:", "https:"].includes(reference.protocol)) {
+          throw new Error("Reference URL must start with http:// or https://");
+        }
+      }
 
       const assignee = users.find((u) => u.userId === formData.assignedTo);
       const data = {
@@ -208,6 +239,41 @@ function TaskForm({
           />
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-surface-300 mb-1.5">
+            Category
+          </label>
+          <div
+            className="grid grid-cols-2 gap-2"
+            role="radiogroup"
+            aria-label="Task category"
+          >
+            {SELECTABLE_CATEGORIES.map((category) => {
+              const isActive = formData.category === category;
+              return (
+                <button
+                  key={category}
+                  type="button"
+                  aria-pressed={isActive}
+                  onClick={() =>
+                    setFormData((prev) => ({ ...prev, category }))
+                  }
+                  className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all ${
+                    isActive
+                      ? TASK_CATEGORY_COLORS[category]
+                      : "bg-white/5 border-white/10 text-surface-400 hover:border-white/25 hover:text-surface-200"
+                  }`}
+                >
+                  <span className="text-base leading-none" aria-hidden="true">
+                    {TASK_CATEGORY_ICONS[category]}
+                  </span>
+                  {TASK_CATEGORY_LABELS[category]}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-surface-300 mb-1.5">
@@ -250,15 +316,31 @@ function TaskForm({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Input
-            label="Due Date *"
-            name="dueDate"
-            type="datetime-local"
-            value={formData.dueDate}
-            onChange={handleChange}
-            required
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+          <div>
+            <Input
+              label="Due Date *"
+              name="dueDate"
+              type="datetime-local"
+              value={formData.dueDate}
+              onChange={handleChange}
+              required
+            />
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs text-surface-500">Quick set:</span>
+              {DUE_DATE_SUGGESTIONS.map((days) => (
+                <button
+                  key={days}
+                  type="button"
+                  onClick={() => setSuggestedDueDate(days)}
+                  className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-medium text-surface-300 transition-colors hover:border-primary-400/40 hover:bg-primary-500/10 hover:text-primary-300"
+                  title={`Set due date to ${days} ${days === 1 ? "day" : "days"} from now`}
+                >
+                  +{days} {days === 1 ? "day" : "days"}
+                </button>
+              ))}
+            </div>
+          </div>
           <div>
             <label className="block text-sm font-medium text-surface-300 mb-1.5">
               Status
@@ -277,6 +359,17 @@ function TaskForm({
             </select>
           </div>
         </div>
+
+        <Input
+          label="Reference Link (video or document)"
+          name="referenceUrl"
+          type="url"
+          value={formData.referenceUrl}
+          onChange={handleChange}
+          placeholder="https://youtube.com/... or https://docs.google.com/..."
+          inputMode="url"
+          autoComplete="url"
+        />
 
         <div>
           <label className="block text-sm font-medium text-surface-300 mb-1.5">

@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { courseService } from "../services/courseService";
 import { useAuth } from "../hooks/useAuth";
 import { useTasks } from "../hooks/useTasks";
-import { COURSE_GRADIENTS, TASK_STATUS } from "../utils/constants";
+import { COURSE_GRADIENTS, TASK_STATUS, TASK_CATEGORY } from "../utils/constants";
 import Loader from "../components/common/Loader";
 import Button from "../components/common/Button";
 import CourseProgress from "../components/courses/CourseProgress";
@@ -21,7 +21,7 @@ function CoursePage() {
   const [course, setCourse] = useState(null);
   const [courseError, setCourseError] = useState(null);
   const [courseLoading, setCourseLoading] = useState(true);
-  const [query, setQuery] = useState({ search: "", status: "all" });
+  const [query, setQuery] = useState({ search: "", status: "all", category: "all" });
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [isCourseFormOpen, setIsCourseFormOpen] = useState(false);
@@ -59,6 +59,11 @@ function CoursePage() {
     () =>
       tasks.filter((task) => {
         if (query.status !== "all" && task.status !== query.status)
+          return false;
+        if (
+          query.category !== "all" &&
+          (task.category || TASK_CATEGORY.ACTION) !== query.category
+        )
           return false;
         if (query.search) {
           const search = query.search.toLowerCase();
