@@ -38,6 +38,7 @@ function buildPermissions(creatorId, assignedTo) {
     Permission.delete(Role.user(creatorId)),
   ];
   if (assignedTo && assignedTo !== creatorId) {
+    permissions.push(Permission.read(Role.user(assignedTo)));
     permissions.push(Permission.update(Role.user(assignedTo)));
   }
   return permissions;
