@@ -96,9 +96,8 @@ export const taskService = {
         );
       }
 
-      return tasks.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-      );
+      // Soonest due date first
+      return tasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
     } catch (error) {
       throw new Error(error.message || "Failed to fetch tasks");
     }

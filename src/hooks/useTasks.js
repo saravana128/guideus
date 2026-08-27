@@ -2,6 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { taskService } from "../services/taskService";
 import { useAuth } from "./useAuth";
 
+// Keep the list ordered by soonest due date first (matches taskService.listTasks)
+const sortByDueDate = (list) =>
+  [...list].sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
 export function useTasks(filters = {}) {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
@@ -33,12 +37,14 @@ export function useTasks(filters = {}) {
 
   const replaceTask = (updated) =>
     setTasks((prev) =>
-      prev.map((task) => (task.$id === updated.$id ? updated : task)),
+      sortByDueDate(
+        prev.map((task) => (task.$id === updated.$id ? updated : task)),
+      ),
     );
 
   const createTask = async (taskData) => {
     const newTask = await taskService.createTask(taskData, user);
-    setTasks((prev) => [newTask, ...prev]);
+    setTasks((prev) => sortByDueDate([...prev, newTask]));
     return newTask;
   };
 
